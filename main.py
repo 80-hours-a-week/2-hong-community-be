@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from pydantic import BaseModel
+from routers.user_router import router as user_router
 
 app = FastAPI()
 
@@ -8,15 +8,4 @@ app = FastAPI()
 def hello():
     return {"message": "Hello, FastAPI!"}
 
-# POST 요청에서 받을 데이터 모델
-class User(BaseModel):
-    name: str
-    age: int
-
-# POST 요청
-@app.post("/users")
-def create_user(user: User):
-    return {
-        "message": "User created successfully",
-        "user": user
-    }
+app.include_router(user_router)
