@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, status
 from fastapi.responses import JSONResponse
 from models import PostCreate
 from controllers import post_controller as controller # 컨트롤러 임포트
@@ -21,8 +21,8 @@ async def get_post_detail(postId: int):
     
     if not post:
         return JSONResponse(
-            status_code=400,
-            content={"code": "invalid_request", "data": None}
+            status_code=status.HTTP_404_NOT_FOUND,
+            content={"code": "Not_found", "data": None}
         )
     
     return {

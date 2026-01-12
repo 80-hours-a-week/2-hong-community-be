@@ -47,8 +47,6 @@ def create_post(post_data: PostCreate):
         },
         createdAt=datetime.now().isoformat()
     )
-    posts.append(new_post.model_dump())
-    save_posts(posts)
     
     # 2. JSON 파일에 저장하기 위해 딕셔너리로 변환
     posts.append(new_post.model_dump()) 
