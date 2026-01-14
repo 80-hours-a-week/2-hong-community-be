@@ -23,9 +23,6 @@ async def get_post_detail(request: Request, postId: int):
     # 컨트롤러에서 데이터 가져오기
     post = controller.get_post_detail(postId)
     
-    if not post:
-        return await not_found_exception_handler(request)
-    
     return {
         "code": "POST_RETRIEVED",
         "data": post
