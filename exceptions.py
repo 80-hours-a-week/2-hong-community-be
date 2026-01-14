@@ -33,14 +33,6 @@ async def global_exception_handler(request: Request, exc: Exception):
     )
 
 
-# 4. 리소스 없음 (404)
-async def not_found_exception_handler(request: Request, exc: Exception = None):
-    return JSONResponse(
-        status_code=status.HTTP_404_NOT_FOUND,
-        content={"code": "Not_found", "data": None}
-    )
-
-
 def register_exception_handlers(app: FastAPI) -> None:
 
     app.add_exception_handler(RequestValidationError, validation_exception_handler)
