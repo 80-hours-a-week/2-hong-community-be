@@ -1,7 +1,8 @@
-from fastapi import APIRouter, Query, status
+from fastapi import APIRouter, Query, status, Request
 from fastapi.responses import JSONResponse
 from models import PostCreate
 from controllers import post_controller as controller # 컨트롤러 임포트
+from exceptions import validation_exception_handler
 
 router = APIRouter(
     prefix="/v1/posts",
@@ -9,7 +10,10 @@ router = APIRouter(
 )
 
 @router.get("")
-async def get_posts(page: int = Query(1), size: int = Query(10)):
+async def get_posts(request: Request, page: int = Query(1), size: int = Query(10)):
+    if page <= 0 or size <= 0:
+        return await validation_exception_handler(request, None)
+
     # 컨트롤러 함수 호출
     result = controller.get_all_posts(page, size)
     return result
