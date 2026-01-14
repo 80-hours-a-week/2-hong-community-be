@@ -2,7 +2,7 @@ from fastapi import APIRouter, Query, status, Request
 from fastapi.responses import JSONResponse
 from models import PostCreate
 from controllers import post_controller as controller # 컨트롤러 임포트
-from exceptions import validation_exception_handler
+from exceptions import validation_exception_handler, not_found_exception_handler
 
 router = APIRouter(
     prefix="/v1/posts",
@@ -19,15 +19,12 @@ async def get_posts(request: Request, page: int = Query(1), size: int = Query(10
     return result
 
 @router.get("/{postId}")
-async def get_post_detail(postId: int):
+async def get_post_detail(request: Request, postId: int):
     # 컨트롤러에서 데이터 가져오기
     post = controller.get_post_detail(postId)
     
     if not post:
-        return JSONResponse(
-            status_code=status.HTTP_404_NOT_FOUND,
-            content={"code": "Not_found", "data": None}
-        )
+        return await not_found_exception_handler(request)
     
     return {
         "code": "POST_RETRIEVED",
