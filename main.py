@@ -17,6 +17,8 @@ register_exception_handlers(app)
 async def root():
     return {"message": "Community API Server is running"}
 
+# 서버 실행 (python main.py 실행 간편화)
+# 완성 후 제거
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
