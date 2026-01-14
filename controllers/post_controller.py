@@ -2,6 +2,7 @@ from datetime import datetime
 from fastapi.responses import JSONResponse
 from database import load_posts, save_posts
 from models import Post, PostCreate, Author, PostFile
+from exceptions import not_found_exception_handler
 
 def get_all_posts(page: int, size: int):
     posts = load_posts()
@@ -12,12 +13,12 @@ def get_all_posts(page: int, size: int):
         "data": posts[start:end]
     }
 
-def get_post_detail(postId: int):
+async def get_post_detail(request, postId: int):
     posts = load_posts()
     post = next((p for p in posts if p["postId"] == postId), None)
     
-    if not post:
-        return None  # Router에서 처리하도록 None 반환
+    if post is None:
+        return await not_found_exception_handler(request)
     
     # 조회수 증가
     post["hits"] += 1
