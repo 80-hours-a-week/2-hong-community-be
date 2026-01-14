@@ -4,7 +4,7 @@ from models import PostCreate
 from controllers import post_controller as controller # 컨트롤러 임포트
 
 router = APIRouter(
-    prefix="/V1/posts",
+    prefix="/v1/posts",
     tags=["posts"]
 )
 
