@@ -1,11 +1,11 @@
 from datetime import datetime
 from fastapi.responses import JSONResponse
-from database import load_posts, save_posts
+from database import posts_db
 from models import Post, PostCreate, Author, PostFile
 from exceptions import not_found_exception_handler
 
 def get_all_posts(page: int, size: int):
-    posts = load_posts()
+    posts = posts_db.get_posts()
     start = (page - 1) * size
     end = start + size
     return {
@@ -14,7 +14,7 @@ def get_all_posts(page: int, size: int):
     }
 
 async def get_post_detail(request, postId: int):
-    posts = load_posts()
+    posts = posts_db.get_posts()
     post = next((p for p in posts if p["postId"] == postId), None)
     
     if post is None:
@@ -22,11 +22,11 @@ async def get_post_detail(request, postId: int):
     
     # 조회수 증가
     post["hits"] += 1
-    save_posts(posts)
+    posts_db.save_posts(posts)
     return post
 
 def create_post(post_data: PostCreate):
-    posts = load_posts()
+    posts = posts_db.get_posts()
     new_id = max([p["postId"] for p in posts], default=0) + 1
     
     # 1. Post 모델 인스턴스 생성
@@ -51,7 +51,7 @@ def create_post(post_data: PostCreate):
     
     # 2. JSON 파일에 저장하기 위해 딕셔너리로 변환
     posts.append(new_post.model_dump()) 
-    save_posts(posts)
+    posts_db.save_posts(posts)
     
     return {
         "code": "post_success",

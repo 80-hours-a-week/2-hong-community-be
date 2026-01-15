@@ -3,6 +3,7 @@ from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from routers import post_router
+from auth import auth_router
 from exceptions import register_exception_handlers
 
 app = FastAPI()
@@ -12,6 +13,9 @@ app.include_router(post_router.router)
 
 # 예외 처리기 등록
 register_exception_handlers(app)
+
+# 인증 라우터 등록
+app.include_router(auth_router.router)
 
 @app.get("/")
 async def root():

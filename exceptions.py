@@ -6,9 +6,17 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 
 # 1. 필수 파라미터 누락 등 유효성 검사 실패 (400)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    errors = {}
+    for error in exc.errors():
+        field = str(error["loc"][-1])
+        msg = error["msg"]
+        if field not in errors:
+            errors[field] = []
+        errors[field].append(msg)
+
     return JSONResponse(
         status_code=status.HTTP_400_BAD_REQUEST,
-        content={"code": "invalid_request", "data": None}
+        content={"code": "invalid_request", "data": errors}
     )
 
 
