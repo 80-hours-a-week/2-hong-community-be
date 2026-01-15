@@ -20,26 +20,25 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
         content={"code": "BAD_REQUEST", "data": errors}
     )
 
-
-# 2. 리소스 없음 (404)
-async def not_found_exception_handler(request: Request, exc: Exception = None):
-    return JSONResponse(
-        status_code=status.HTTP_404_NOT_FOUND,
-        content={"code": "NOT_FOUND", "data": None}
-    )
-
-# 3. 인증 필요 (401)
+# 2. 인증 필요 (401)
 async def unauthorized_exception_handler(request: Request, exc: StarletteHTTPException):
     return JSONResponse(
         status_code=status.HTTP_401_UNAUTHORIZED,
         content={"code": "UNAUTHORIZED", "data": None}
     )
 
-# 4. 접근 권한 없음 (403)
+# 3. 접근 권한 없음 (403)
 async def forbidden_exception_handler(request: Request, exc: StarletteHTTPException):
     return JSONResponse(
         status_code=status.HTTP_403_FORBIDDEN,
         content={"code": "FORBIDDEN", "data": None}
+    )
+
+# 4. 리소스 없음 (404)
+async def not_found_exception_handler(request: Request, exc: Exception = None):
+    return JSONResponse(
+        status_code=status.HTTP_404_NOT_FOUND,
+        content={"code": "NOT_FOUND", "data": None}
     )
 
 # 5. 허용되지 않은 메서드 (405)
