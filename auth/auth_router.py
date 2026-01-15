@@ -1,5 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Header
+from fastapi import APIRouter, Depends, HTTPException, status, Header, Request
 from fastapi.responses import JSONResponse
+from fastapi.exceptions import RequestValidationError
 from typing import Optional
 from jose import JWTError
 
@@ -11,6 +12,7 @@ from auth.auth_schemas import (
 from auth.auth_utils import (
     get_password_hash, verify_password, create_access_token, decode_access_token
 )
+from exceptions import validation_exception_handler
 
 router = APIRouter(
     prefix="/v1/auth", 
@@ -21,7 +23,7 @@ router = APIRouter(
 async def get_current_user(authorization: Optional[str] = Header(None)):
     if not authorization or not authorization.startswith("Bearer "):
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
+            status_code=status.HTTP_401_UNAUTHORIZED, # exceptions.py에서 가져오기
             detail={"code": "UNAUTHORIZED", "data": None}
         )
     
@@ -33,14 +35,14 @@ async def get_current_user(authorization: Optional[str] = Header(None)):
             raise ValueError("Token missing sub")
     except (JWTError, ValueError):
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
+            status_code=status.HTTP_401_UNAUTHORIZED, # exceptions.py에서 가져오기
             detail={"code": "UNAUTHORIZED", "data": None}
         )
     
     user = users_db.find_user_by_email(email)
     if user is None:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
+            status_code=status.HTTP_401_UNAUTHORIZED, # exceptions.py에서 가져오기
             detail={"code": "UNAUTHORIZED", "data": None}
         )
     return user
@@ -112,9 +114,10 @@ async def get_me(user: dict = Depends(get_current_user)):
     }
 
 @router.get("/emails/availability", status_code=200, response_model=BaseResponse)
-async def check_email(email: str):
+async def check_email(request: Request, email: str):
     if not email:
-        return JSONResponse(status_code=400, content={"code": "BAD_REQUEST", "data": None})
+        exc = RequestValidationError([{"loc": ["query", "email"], "msg": "Email is required"}])
+        return await validation_exception_handler(request, exc)
         
     if users_db.find_user_by_email(email):
         return JSONResponse(
@@ -125,9 +128,10 @@ async def check_email(email: str):
     return {"code": "EMAIL_AVAILABLE", "data": None}
 
 @router.get("/nicknames/availability", status_code=200, response_model=BaseResponse)
-async def check_nickname(nickname: str):
+async def check_nickname(request: Request, nickname: str):
     if not nickname:
-        return JSONResponse(status_code=400, content={"code": "BAD_REQUEST", "data": None})
+        exc = RequestValidationError([{"loc": ["query", "nickname"], "msg": "Nickname is required"}])
+        return await validation_exception_handler(request, exc)
 
     if users_db.find_user_by_nickname(nickname):
         return JSONResponse(
