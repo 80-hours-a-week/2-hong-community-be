@@ -24,7 +24,7 @@ async def get_post_detail(request: Request, postId: int):
     post = controller.get_post_detail(postId)
     
     return {
-        "code": "POST_RETRIEVED",
+        "code": "post_retrieved",
         "data": post
     }
 

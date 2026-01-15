@@ -37,7 +37,7 @@ async def global_exception_handler(request: Request, exc: Exception):
 async def not_found_exception_handler(request: Request, exc: Exception = None):
     return JSONResponse(
         status_code=status.HTTP_404_NOT_FOUND,
-        content={"code": "Not_found", "data": None}
+        content={"code": "not_found", "data": None}
     )
 
 
