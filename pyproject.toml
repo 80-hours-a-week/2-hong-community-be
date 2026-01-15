@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "hong-community-be"
+version = "0.1.0"
+description = "Hong Community Backend API"
+authors = ["Author <sb07907@naver.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+fastapi = "^0.109.0"
+uvicorn = {extras = ["standard"], version = "^0.27.0"}
+pydantic = {extras = ["email"], version = "^2.6.0"}
+python-jose = {extras = ["cryptography"], version = "^3.3.0"}
+bcrypt = "^4.1.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
