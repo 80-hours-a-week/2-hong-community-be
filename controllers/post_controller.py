@@ -25,7 +25,7 @@ async def get_post_detail(request, postId: int):
     posts_db.save_posts(posts)
     return post
 
-def create_post(post_data: PostCreate):
+def create_post(post_data: PostCreate, user: dict):
     posts = posts_db.get_posts()
     new_id = max([p["postId"] for p in posts], default=0) + 1
     
@@ -38,9 +38,9 @@ def create_post(post_data: PostCreate):
         commentCount=0,
         hits=0,
         author={
-            "userId": 100,
-            "nickname": post_data.nickname,
-            "profileImageUrl": "http://default-image.com/profile.jpg"
+            "userId": user["id"],
+            "nickname": user["nickname"],
+            "profileImageUrl": user.get("profileImageUrl") or "http://default-image.com/profile.jpg"
         },
         file={
             "fileId": 1,
