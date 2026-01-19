@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Query, Request, Depends
+from fastapi import APIRouter, Query, Request, Depends, UploadFile, File
 from models import PostCreate, PostUpdate
 from posts import posts_controller
 from exceptions import validation_exception_handler
@@ -39,6 +39,10 @@ async def update_post(postId: int, post_data: PostUpdate, user: dict = Depends(g
 @router.delete("/{postId}")
 async def delete_post(postId: int, user: dict = Depends(get_current_user)):
     return posts_controller.delete_post(postId, user)
+
+@router.post("/image", status_code=201)
+async def upload_post_image(postFile: UploadFile = File(...), user: dict = Depends(get_current_user)):
+    return posts_controller.upload_post_image(postFile)
 
 @router.post("/{postId}/likes", status_code=201)
 async def like_post(postId: int, user: dict = Depends(get_current_user)):

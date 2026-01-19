@@ -1,8 +1,13 @@
 from datetime import datetime
-from fastapi import HTTPException, status
+from fastapi import HTTPException, status, UploadFile
 from database import posts_db
 from models import Post, PostCreate, PostUpdate
 from exceptions import not_found_exception_handler
+import os
+import shutil
+import uuid
+
+UPLOAD_DIR = "public/image/posts"
 
 def get_all_posts(page: int, size: int):
     posts = posts_db.get_posts()
@@ -153,5 +158,29 @@ def unlike_post(postId: int, user: dict):
         "code": "POST_LIKE_DELETED",
         "data": {
             "likeCount": post["likeCount"]
+        }
+    }
+
+def upload_post_image(file: UploadFile):
+    if not os.path.exists(UPLOAD_DIR):
+        os.makedirs(UPLOAD_DIR)
+        
+    filename = file.filename
+    ext = filename.split(".")[-1].lower() if "." in filename else ""
+    if ext not in ["jpg", "jpeg", "png"]:
+         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="INVALID_FILE")
+    
+    saved_filename = f"{uuid.uuid4()}.{ext}"
+    file_path = os.path.join(UPLOAD_DIR, saved_filename)
+    
+    with open(file_path, "wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+        
+    post_file_url = f"/public/image/posts/{saved_filename}"
+    
+    return {
+        "code": "POST_FILE_UPLOADED",
+        "data": {
+            "postFileUrl": post_file_url
         }
     }
