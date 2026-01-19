@@ -17,8 +17,8 @@ async def get_my_info(user: dict = Depends(get_current_user)):
     }
 
 @router.get("/{userId}")
-async def get_user_info(userId: int):
-    user_info = controller.get_user_info(userId)
+async def get_user_info(userId: int, user: dict = Depends(get_current_user)):
+    user_info = controller.get_user_info(userId, user)
     return {
         "code": "USER_RETRIEVED",
         "data": user_info
