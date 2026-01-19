@@ -68,6 +68,16 @@ class USERS_JSONDatabase:
                 return user
         return None
 
+    def find_user_by_id(self, user_id: int) -> Optional[Dict]:
+        users = self.get_users()
+        for user in users:
+            if user.get("id") == user_id:
+                return user
+        return None
+
+    def save_users(self, users: List[Dict]):
+        self._write_data({"users": users})
+
 COMMENTS_DB_FILE = "comments.json"
 
 class COMMENTS_JSONDatabase:

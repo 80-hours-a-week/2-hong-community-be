@@ -2,21 +2,30 @@ from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
-from routers import post_router
+from posts import posts_router
+from comments import comments_router
 from auth import auth_router
+from users import users_router
 from exceptions import register_exception_handlers
 
 app = FastAPI()
 
-# 라우터 등록
-app.include_router(post_router.router)
+# 게시글 라우터 등록
+app.include_router(posts_router.router)
 
-# 예외 처리기 등록
-register_exception_handlers(app)
+# 댓글 라우터 등록
+app.include_router(comments_router.router)
 
 # 인증 라우터 등록
 app.include_router(auth_router.router)
 
+# 유저 라우터 등록
+app.include_router(users_router.router)
+
+# 예외 처리기 등록
+register_exception_handlers(app)
+
+# 루트 경로
 @app.get("/")
 async def root():
     return {"message": "Community API Server is running"}
