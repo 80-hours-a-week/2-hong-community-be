@@ -3,7 +3,6 @@ import os
 from typing import List, Dict, Optional
 
 POSTS_DB_FILE = "posts.json"
-USERS_DB_FILE = "users.json"
 
 class POSTS_JSONDatabase:
     def __init__(self, file_path: str):
@@ -21,6 +20,8 @@ class POSTS_JSONDatabase:
     def save_posts(self, posts):
         with open(self.file_path, "w", encoding="utf-8") as f:
             json.dump(posts, f, ensure_ascii=False, indent=4)
+
+USERS_DB_FILE = "users.json"
 
 class USERS_JSONDatabase:
     def __init__(self, file_path: str):
@@ -67,5 +68,25 @@ class USERS_JSONDatabase:
                 return user
         return None
 
+COMMENTS_DB_FILE = "comments.json"
+
+class COMMENTS_JSONDatabase:
+    def __init__(self, file_path: str):
+        self.file_path = file_path
+
+    def get_comments(self):
+        if not os.path.exists(self.file_path):
+            return []
+        with open(self.file_path, "r", encoding="utf-8") as f:
+            try:
+                return json.load(f)
+            except json.JSONDecodeError:
+                return []
+
+    def save_comments(self, comments):
+        with open(self.file_path, "w", encoding="utf-8") as f:
+            json.dump(comments, f, ensure_ascii=False, indent=4)
+
 posts_db = POSTS_JSONDatabase(POSTS_DB_FILE)
 users_db = USERS_JSONDatabase(USERS_DB_FILE)
+comments_db = COMMENTS_JSONDatabase(COMMENTS_DB_FILE)
