@@ -1,5 +1,5 @@
-from fastapi import HTTPException, status
-from users.users_service import get_user_by_id, update_user, update_user_password, delete_user as service_delete_user
+from fastapi import HTTPException, status, UploadFile
+from users.users_service import get_user_by_id, update_user, update_user_password, delete_user as service_delete_user, upload_profile_image as service_upload_image
 from users.users_schemas import UserUpdate, UserPasswordUpdate
 
 def get_user_info(user_id: int, current_user: dict):
@@ -43,4 +43,17 @@ def delete_user(user_id: int, current_user: dict):
     return {
         "code": "USER_DELETED",
         "data": None
+    }
+
+def upload_profile_image(file: UploadFile, current_user: dict):
+    # Only for me, so no userId param in URL usually for this specific endpoint structure '/me/profile-image'
+    # Reference: POST /v1/users/me/profile-image
+    
+    image_url = service_upload_image(current_user["id"], file)
+    
+    return {
+        "code": "PROFILE_IMAGE_UPLOADED",
+        "data": {
+            "profileImageUrl": image_url
+        }
     }

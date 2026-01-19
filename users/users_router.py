@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status, UploadFile, File
 from users import users_controller as controller
 from users.users_schemas import UserUpdate, UserPasswordUpdate
 from auth.auth_dependencies import get_current_user
@@ -39,6 +39,10 @@ async def update_user_password(userId: int, password_data: UserPasswordUpdate, u
 @router.patch("/password")
 async def update_my_password(password_data: UserPasswordUpdate, user: dict = Depends(get_current_user)):
     return controller.update_password(user["id"], password_data, user)
+
+@router.post("/me/profile-image", status_code=201)
+async def upload_profile_image(profileImage: UploadFile = File(...), user: dict = Depends(get_current_user)):
+    return controller.upload_profile_image(profileImage, user)
 
 @router.delete("/me")
 async def delete_me(user: dict = Depends(get_current_user)):
