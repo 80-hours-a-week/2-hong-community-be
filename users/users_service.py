@@ -53,3 +53,14 @@ def update_user_password(user_id: int, current_password: str, new_password: str)
     users[user_idx] = current_user
     users_db.save_users(users)
     return current_user
+
+def delete_user(user_id: int):
+    users = users_db.get_users()
+    initial_count = len(users)
+    users = [u for u in users if u["id"] != user_id]
+    
+    if len(users) == initial_count:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="USER_NOT_FOUND")
+        
+    users_db.save_users(users)
+    return True

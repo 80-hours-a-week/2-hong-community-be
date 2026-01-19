@@ -1,5 +1,5 @@
 from fastapi import HTTPException, status
-from users.users_service import get_user_by_id, update_user, update_user_password
+from users.users_service import get_user_by_id, update_user, update_user_password, delete_user as service_delete_user
 from users.users_schemas import UserUpdate, UserPasswordUpdate
 
 def get_user_info(user_id: int, current_user: dict):
@@ -31,5 +31,16 @@ def update_password(user_id: int, password_data: UserPasswordUpdate, current_use
     
     return {
         "code": "USER_PASSWORD_UPDATED",
+        "data": None
+    }
+
+def delete_user(user_id: int, current_user: dict):
+    if current_user["id"] != user_id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="FORBIDDEN")
+    
+    service_delete_user(user_id)
+    
+    return {
+        "code": "USER_DELETED",
         "data": None
     }

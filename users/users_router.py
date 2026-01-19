@@ -39,3 +39,11 @@ async def update_user_password(userId: int, password_data: UserPasswordUpdate, u
 @router.patch("/password")
 async def update_my_password(password_data: UserPasswordUpdate, user: dict = Depends(get_current_user)):
     return controller.update_password(user["id"], password_data, user)
+
+@router.delete("/me")
+async def delete_me(user: dict = Depends(get_current_user)):
+    return controller.delete_user(user["id"], user)
+
+@router.delete("/{userId}")
+async def delete_user(userId: int, user: dict = Depends(get_current_user)):
+    return controller.delete_user(userId, user)
