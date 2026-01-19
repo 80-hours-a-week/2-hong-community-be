@@ -43,3 +43,7 @@ async def delete_post(postId: int, user: dict = Depends(get_current_user)):
 @router.post("/{postId}/likes", status_code=201)
 async def like_post(postId: int, user: dict = Depends(get_current_user)):
     return posts_controller.like_post(postId, user)
+
+@router.delete("/{postId}/likes")
+async def unlike_post(postId: int, user: dict = Depends(get_current_user)):
+    return posts_controller.unlike_post(postId, user)

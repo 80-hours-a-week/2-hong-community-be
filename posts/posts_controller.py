@@ -129,3 +129,29 @@ def like_post(postId: int, user: dict):
             "likeCount": post["likeCount"]
         }
     }
+
+def unlike_post(postId: int, user: dict):
+    posts = posts_db.get_posts()
+    post = next((p for p in posts if p["postId"] == postId), None)
+    
+    if post is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="POST_NOT_FOUND")
+    
+    if "likedBy" not in post:
+        post["likedBy"] = []
+    
+    if user["id"] not in post["likedBy"]:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="POST_ALREADY_UNLIKED")
+    
+    post["likedBy"].remove(user["id"])
+    if post["likeCount"] > 0:
+        post["likeCount"] -= 1
+    
+    posts_db.save_posts(posts)
+    
+    return {
+        "code": "POST_LIKE_DELETED",
+        "data": {
+            "likeCount": post["likeCount"]
+        }
+    }
