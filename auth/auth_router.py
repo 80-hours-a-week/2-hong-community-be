@@ -33,5 +33,5 @@ async def check_nickname(request: Request, nickname: str):
     return await auth_controller.check_nickname(request, nickname)
 
 @router.delete("/session", status_code=200, response_model=BaseResponse)
-async def logout():
+async def logout(user: dict = Depends(get_current_user)):
     return await auth_controller.logout()

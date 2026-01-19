@@ -87,4 +87,4 @@ async def check_nickname(request: Request, nickname: str):
     return {"code": "NICKNAME_AVAILABLE", "data": None}
 
 async def logout():
-    return {"code": "SESSION_DELETED", "data": None}
+    return {"code": "AUTH_TOKEN_DELETED", "data": None}
