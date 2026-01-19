@@ -12,6 +12,12 @@ pydantic = {extras = ["email"], version = "^2.6.0"}
 python-jose = {extras = ["cryptography"], version = "^3.3.0"}
 bcrypt = "^4.1.0"
 
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0.0"
+httpx = "^0.26.0"
+black = "^24.1.0"
+isort = "^5.13.0"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
