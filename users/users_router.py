@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, status
 from users import users_controller as controller
-from users.users_schemas import UserUpdate
+from users.users_schemas import UserUpdate, UserPasswordUpdate
 from auth.auth_dependencies import get_current_user
 
 router = APIRouter(
@@ -31,3 +31,11 @@ async def update_my_info(update_data: UserUpdate, user: dict = Depends(get_curre
 @router.patch("/{userId}")
 async def update_user_info(userId: int, update_data: UserUpdate, user: dict = Depends(get_current_user)):
     return controller.update_user_info(userId, update_data, user)
+
+@router.patch("/{userId}/password")
+async def update_user_password(userId: int, password_data: UserPasswordUpdate, user: dict = Depends(get_current_user)):
+    return controller.update_password(userId, password_data, user)
+
+@router.patch("/password")
+async def update_my_password(password_data: UserPasswordUpdate, user: dict = Depends(get_current_user)):
+    return controller.update_password(user["id"], password_data, user)

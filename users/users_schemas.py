@@ -11,3 +11,7 @@ class UserResponse(BaseModel):
 class UserUpdate(BaseModel):
     nickname: Optional[str] = None
     profileImageUrl: Optional[str] = None
+
+class UserPasswordUpdate(BaseModel):
+    currentPassword: str
+    password: str
