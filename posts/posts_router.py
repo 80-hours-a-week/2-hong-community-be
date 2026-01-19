@@ -39,3 +39,7 @@ async def update_post(postId: int, post_data: PostUpdate, user: dict = Depends(g
 @router.delete("/{postId}")
 async def delete_post(postId: int, user: dict = Depends(get_current_user)):
     return posts_controller.delete_post(postId, user)
+
+@router.post("/{postId}/likes", status_code=201)
+async def like_post(postId: int, user: dict = Depends(get_current_user)):
+    return posts_controller.like_post(postId, user)
