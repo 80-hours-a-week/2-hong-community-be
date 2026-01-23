@@ -2,6 +2,8 @@ from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
+from fastapi.middleware.cors import CORSMiddleware
+
 from posts import posts_router
 from comments import comments_router
 from auth import auth_router
@@ -9,6 +11,17 @@ from users import users_router
 from exceptions import register_exception_handlers
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:3000",   # React
+        "http://localhost:5173",   # Vite
+    ],
+    allow_credentials=True,      # 쿠키 / 세션 / 인증 헤더 허용
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # 게시글 라우터 등록
 app.include_router(posts_router.router)
