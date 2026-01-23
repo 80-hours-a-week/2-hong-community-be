@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 
 class Author(BaseModel):
     userId: int
@@ -31,6 +31,7 @@ class Post(BaseModel):
     author: dict
     file: Optional[dict] = None
     createdAt: str
+    likedBy: List[int] = []
 
 class CommentCreate(BaseModel):
     content: str
