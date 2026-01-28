@@ -10,6 +10,9 @@ from auth import auth_router
 from users import users_router
 from exceptions import register_exception_handlers
 
+from database import engine
+import models
+
 app = FastAPI()
 
 app.add_middleware(
@@ -37,6 +40,9 @@ app.include_router(users_router.router)
 
 # 예외 처리기 등록
 register_exception_handlers(app)
+
+# 테이블 생성
+models.Base.metadata.create_all(bind=engine)
 
 # 루트 경로
 @app.get("/")

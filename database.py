@@ -55,8 +55,45 @@ class USERS_JSONDatabase:
         for user in self.get_users():
             if user.get("id") == user_id: return user
         return None
+    def find_user_by_email(self, email: str) -> Optional[Dict]:
+        users = self.get_users()
+        for user in users:
+            if user.get("email") == email:
+                return user
+        return None
+    def find_user_by_nickname(self, nickname: str) -> Optional[Dict]:
+        users = self.get_users()
+        for user in users:
+            if user.get("nickname") == nickname:
+                return user
+        return None
+    def add_user(self, user: Dict) -> Dict:
+        data = self._read_data()
+        if "users" not in data:
+            data["users"] = []
+        user["id"] = len(data["users"]) + 1
+        data["users"].append(user)
+        self._write_data(data)
+        return user
     def save_users(self, users: List[Dict]): self._write_data({"users": users})
+
+class COMMENTS_JSONDatabase:
+    def __init__(self, file_path: str):
+        self.file_path = file_path
+
+    def get_comments(self):
+        if not os.path.exists(self.file_path):
+            return []
+        with open(self.file_path, "r", encoding="utf-8") as f:
+            try:
+                return json.load(f)
+            except json.JSONDecodeError:
+                return []
+
+    def save_comments(self, comments):
+        with open(self.file_path, "w", encoding="utf-8") as f:
+            json.dump(comments, f, ensure_ascii=False, indent=4)
 
 posts_db = POSTS_JSONDatabase("posts.json")
 users_db = USERS_JSONDatabase("users.json")
-comments_db = POSTS_JSONDatabase("comments.json")
+comments_db = COMMENTS_JSONDatabase("comments.json")
