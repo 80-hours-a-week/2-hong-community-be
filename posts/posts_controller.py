@@ -1,7 +1,7 @@
 from datetime import datetime
-from fastapi import HTTPException, status, UploadFile
 from database import posts_db
-from models import Post, PostCreate, PostUpdate
+from schemas import Post, PostCreate, PostUpdate
+from fastapi import HTTPException, status, Request, UploadFile
 from exceptions import not_found_exception_handler
 import os
 import shutil

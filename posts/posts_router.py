@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Query, Request, Depends, UploadFile, File
-from models import PostCreate, PostUpdate
+from schemas import PostCreate, PostUpdate
 from posts import posts_controller
 from exceptions import validation_exception_handler
 from auth.auth_dependencies import get_current_user

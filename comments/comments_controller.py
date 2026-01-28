@@ -1,7 +1,7 @@
 from datetime import datetime
-from fastapi import HTTPException, status
 from database import posts_db, comments_db
-from models import Comment, CommentCreate, CommentUpdate
+from schemas import Comment, CommentCreate, CommentUpdate
+from fastapi import HTTPException, status
 
 def create_comment(postId: int, comment_data: CommentCreate, user: dict):
     posts = posts_db.get_posts()

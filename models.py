@@ -1,47 +1,46 @@
-from pydantic import BaseModel
-from typing import Optional, List
+from sqlalchemy import Column, Integer, String, Text, ForeignKey, DateTime
+from sqlalchemy.orm import relationship
+from database import Base
+from datetime import datetime
 
-class Author(BaseModel):
-    userId: int
-    nickname: str
-    profileImageUrl: str
+class User(Base):
+    __tablename__ = "users"
 
-class PostFile(BaseModel):
-    fileId: int
-    fileUrl: str
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String(100), unique=True, index=True, nullable=False)
+    password = Column(String(255), nullable=False)
+    nickname = Column(String(50), unique=True, index=True, nullable=False)
+    profileImageUrl = Column(String(255), nullable=True)
+    createdAt = Column(DateTime, default=datetime.now)
 
-class PostCreate(BaseModel):
-    nickname: str
-    title: str
-    content: str
-    image: Optional[str] = None
+    posts = relationship("Post", back_populates="author")
+    comments = relationship("Comment", back_populates="author")
 
-class PostUpdate(BaseModel):
-    title: str
-    content: str
-    fileUrl: Optional[str] = None
+class Post(Base):
+    __tablename__ = "posts"
 
-class Post(BaseModel):
-    postId: int
-    title: str
-    content: str
-    likeCount: int = 0
-    commentCount: int = 0
-    hits: int = 0
-    author: dict
-    file: Optional[dict] = None
-    createdAt: str
-    likedBy: List[int] = []
+    postId = Column(Integer, primary_key=True, index=True)
+    title = Column(String(200), nullable=False)
+    content = Column(Text, nullable=False)
+    likeCount = Column(Integer, default=0)
+    commentCount = Column(Integer, default=0)
+    hits = Column(Integer, default=0)
+    fileUrl = Column(String(255), nullable=True)
+    createdAt = Column(DateTime, default=datetime.now)
+    
+    authorId = Column(Integer, ForeignKey("users.id"))
+    author = relationship("User", back_populates="posts")
+    comments = relationship("Comment", back_populates="post", cascade="all, delete-orphan")
 
-class CommentCreate(BaseModel):
-    content: str
+class Comment(Base):
+    __tablename__ = "comments"
 
-class CommentUpdate(BaseModel):
-    content: str
+    commentId = Column(Integer, primary_key=True, index=True)
+    content = Column(Text, nullable=False)
+    createdAt = Column(DateTime, default=datetime.now)
 
-class Comment(BaseModel):
-    commentId: int
-    postId: int
-    content: str
-    author: dict
-    createdAt: str
+    authorId = Column(Integer, ForeignKey("users.id"))
+    postId = Column(Integer, ForeignKey("posts.postId"))
+
+    author = relationship("User", back_populates="comments")
+    post = relationship("Post", back_populates="comments")

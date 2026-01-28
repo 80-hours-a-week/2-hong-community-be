@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends
-from models import CommentCreate, CommentUpdate
+from schemas import CommentCreate, CommentUpdate
 from comments import comments_controller
 from auth.auth_dependencies import get_current_user
 
