@@ -35,7 +35,7 @@ def update_user(user_id: int, update_data: dict):
     users_db.save_users(users)
     return current_user
 
-def update_user_password(user_id: int, current_password: str, new_password: str):
+def update_user_password(user_id: int, new_password: str):
     users = users_db.get_users()
     user_idx = -1
     for i, u in enumerate(users):
@@ -48,10 +48,6 @@ def update_user_password(user_id: int, current_password: str, new_password: str)
     
     current_user = users[user_idx]
     
-    # Verify current password
-    if not verify_password(current_password, current_user["password"]):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED")
-        
     # Update password
     current_user["password"] = get_password_hash(new_password)
     users[user_idx] = current_user

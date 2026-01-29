@@ -13,5 +13,4 @@ class UserUpdate(BaseModel):
     profileImageUrl: Optional[str] = None
 
 class UserPasswordUpdate(BaseModel):
-    currentPassword: str
     password: str

@@ -28,6 +28,11 @@ async def get_user_info(userId: int, user: dict = Depends(get_current_user)):
 async def update_my_info(update_data: UserUpdate, user: dict = Depends(get_current_user)):
     return controller.update_user_info(user["id"], update_data, user)
 
+@router.patch("/password")
+async def update_my_password(password_data: UserPasswordUpdate, user: dict = Depends(get_current_user)):
+    # Update my password
+    return controller.update_password(user["id"], password_data, user)
+
 @router.patch("/{userId}")
 async def update_user_info(userId: int, update_data: UserUpdate, user: dict = Depends(get_current_user)):
     return controller.update_user_info(userId, update_data, user)
@@ -35,10 +40,6 @@ async def update_user_info(userId: int, update_data: UserUpdate, user: dict = De
 @router.patch("/{userId}/password")
 async def update_user_password(userId: int, password_data: UserPasswordUpdate, user: dict = Depends(get_current_user)):
     return controller.update_password(userId, password_data, user)
-
-@router.patch("/password")
-async def update_my_password(password_data: UserPasswordUpdate, user: dict = Depends(get_current_user)):
-    return controller.update_password(user["id"], password_data, user)
 
 @router.post("/me/profile-image", status_code=201)
 async def upload_profile_image(profileImage: UploadFile = File(...), user: dict = Depends(get_current_user)):

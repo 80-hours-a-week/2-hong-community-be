@@ -27,7 +27,7 @@ def update_password(user_id: int, password_data: UserPasswordUpdate, current_use
     if current_user["id"] != user_id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="FORBIDDEN")
     
-    update_user_password(user_id, password_data.currentPassword, password_data.password)
+    update_user_password(user_id, password_data.password)
     
     return {
         "code": "USER_PASSWORD_UPDATED",
