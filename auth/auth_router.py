@@ -17,8 +17,8 @@ async def signup(req: SignupRequest):
     return await auth_controller.signup(req)
 
 @router.post("/login", status_code=200, response_model=LoginResponse)
-async def login(req: LoginRequest):
-    return await auth_controller.login(req)
+async def login(req: LoginRequest, request: Request):
+    return await auth_controller.login(req, request)
 
 @router.get("/me", status_code=200, response_model=MeResponse)
 async def get_me(user: dict = Depends(get_current_user)):
@@ -33,5 +33,5 @@ async def check_nickname(request: Request, nickname: str):
     return await auth_controller.check_nickname(request, nickname)
 
 @router.delete("/session", status_code=200, response_model=BaseResponse)
-async def logout(user: dict = Depends(get_current_user)):
-    return await auth_controller.logout()
+async def logout(request: Request, user: dict = Depends(get_current_user)):
+    return await auth_controller.logout(request)

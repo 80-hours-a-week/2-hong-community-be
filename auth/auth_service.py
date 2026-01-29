@@ -1,6 +1,6 @@
 from database import users_db
 from auth.auth_schemas import SignupRequest
-from auth.auth_utils import get_password_hash, verify_password, create_access_token
+from auth.auth_utils import get_password_hash, verify_password
 
 def is_email_exist(email: str) -> bool:
     return users_db.find_user_by_email(email) is not None
@@ -24,6 +24,3 @@ def authenticate_user(email, password):
         return None
     
     return user
-
-def generate_access_token(email: str):
-    return create_access_token(data={"sub": email})

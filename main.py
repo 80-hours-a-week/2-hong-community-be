@@ -4,17 +4,21 @@ from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from starlette.middleware.sessions import SessionMiddleware
 
 from posts import posts_router
 from comments import comments_router
 from auth import auth_router
 from users import users_router
 from exceptions import register_exception_handlers
+from auth.auth_utils import SECRET_KEY
 
 from database import engine
 import models
 
 app = FastAPI()
+
+app.add_middleware(SessionMiddleware, secret_key=SECRET_KEY, max_age=3600)
 
 app.add_middleware(
     CORSMiddleware,

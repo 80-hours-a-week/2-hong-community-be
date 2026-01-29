@@ -25,7 +25,7 @@ async def signup(req: SignupRequest):
     
     return {"code": "SIGNUP_SUCCESS", "data": None}
 
-async def login(req: LoginRequest):
+async def login(req: LoginRequest, request: Request):
     user = auth_service.authenticate_user(req.email, req.password)
     
     if not user:
@@ -34,8 +34,8 @@ async def login(req: LoginRequest):
             content={"code": "INVALID_CREDENTIALS", "data": None}
         )
     
-    # 토큰 생성
-    access_token = auth_service.generate_access_token(user["email"])
+    # 세션 저장
+    request.session["user_email"] = user["email"]
     
     return {
         "code": "LOGIN_SUCCESS",
@@ -43,8 +43,7 @@ async def login(req: LoginRequest):
             "user": {
                 "id": user["id"],
                 "email": user["email"],
-                "nickname": user["nickname"],
-                "authToken": access_token
+                "nickname": user["nickname"]
             }
         }
     }
@@ -86,5 +85,6 @@ async def check_nickname(request: Request, nickname: str):
     
     return {"code": "NICKNAME_AVAILABLE", "data": None}
 
-async def logout():
-    return {"code": "AUTH_TOKEN_DELETED", "data": None}
+async def logout(request: Request):
+    request.session.clear()
+    return {"code": "SESSION_DELETED", "data": None}
