@@ -3,6 +3,7 @@ from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from posts import posts_router
 from comments import comments_router
@@ -20,11 +21,16 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:3000",   # React
         "http://localhost:5173",   # Vite
+        "http://localhost:5500",   # Live Server
+        "http://127.0.0.1:5500",   # Live Server
     ],
     allow_credentials=True,      # 쿠키 / 세션 / 인증 헤더 허용
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# 정적 파일 서빙 설정 (이미지 등)
+app.mount("/public", StaticFiles(directory="public"), name="public")
 
 # 게시글 라우터 등록
 app.include_router(posts_router.router)
