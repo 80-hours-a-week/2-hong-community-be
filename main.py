@@ -22,12 +22,7 @@ app.add_middleware(SessionMiddleware, secret_key=SECRET_KEY, max_age=3600)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",   # React
-        "http://localhost:5173",   # Vite
-        "http://localhost:5500",   # Live Server
-        "http://127.0.0.1:5500",   # Live Server
-    ],
+    allow_origin_regex=".*",     # 모든 Origin 허용 (Credentials 포함) (개발용)
     allow_credentials=True,      # 쿠키 / 세션 / 인증 헤더 허용
     allow_methods=["*"],
     allow_headers=["*"],
