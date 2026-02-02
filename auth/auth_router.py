@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Request, Form, UploadFile, File
 from sqlalchemy.orm import Session
 from database import get_db
 from auth.auth_schemas import (
@@ -14,8 +14,14 @@ router = APIRouter(
 )
 
 @router.post("/signup", status_code=201, response_model=BaseResponse)
-async def signup(req: SignupRequest, db: Session = Depends(get_db)):
-    return await auth_controller.signup(req, db)
+async def signup(
+    email: str = Form(...),
+    password: str = Form(...),
+    nickname: str = Form(...),
+    profileImage: UploadFile = File(None),
+    db: Session = Depends(get_db)
+):
+    return await auth_controller.signup(email, password, nickname, profileImage, db)
 
 @router.post("/login", status_code=200, response_model=LoginResponse)
 async def login(req: LoginRequest, request: Request, db: Session = Depends(get_db)):

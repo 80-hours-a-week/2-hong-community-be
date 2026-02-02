@@ -1,4 +1,4 @@
-from fastapi import Request
+from fastapi import Request, UploadFile
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
 from sqlalchemy.orm import Session
@@ -6,22 +6,22 @@ from sqlalchemy.orm import Session
 from auth.auth_schemas import SignupRequest, LoginRequest
 from auth import auth_service
 
-async def signup(req: SignupRequest, db: Session):
+async def signup(email: str, password: str, nickname: str, profileImage: UploadFile, db: Session):
     # 이메일 중복 체크
-    if auth_service.is_email_exist(req.email, db):
+    if auth_service.is_email_exist(email, db):
         return JSONResponse(
             status_code=409,
             content={"code": "EMAIL_ALREADY_EXISTS", "data": None}
         )
     
     # 닉네임 중복 체크
-    if auth_service.is_nickname_exist(req.nickname, db):
+    if auth_service.is_nickname_exist(nickname, db):
         return JSONResponse(
             status_code=409,
             content={"code": "NICKNAME_ALREADY_EXISTS", "data": None}
         )
 
-    auth_service.create_user(req, db)
+    auth_service.create_user(email, password, nickname, profileImage, db)
     
     return {"code": "SIGNUP_SUCCESS", "data": None}
 
@@ -49,12 +49,6 @@ async def login(req: LoginRequest, request: Request, db: Session):
     }
 
 async def get_me(user: dict):
-    # user는 이미 auth_dependencies에서 DB 조회를 거쳐 dict나 객체로 넘어올 것임.
-    # 현재 auth_dependencies.py는 JSON을 쓰거나 아직 수정되지 않았으므로 확인 필요.
-    # 일단 기존 로직(dict) 호환성을 유지하거나, 객체 속성 접근으로 변경해야 함.
-    # 안전하게 dict.get()을 쓰거나 getattr()을 쓸 수 있음.
-    
-    # 여기서는 user가 Pydantic 모델이나 dict로 넘어온다고 가정.
     return {
         "code": "AUTH_SUCCESS",
         "data": {

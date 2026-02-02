@@ -47,6 +47,10 @@ def delete_user(user_id: int, db: Session):
     return True
 
 def upload_profile_image(user_id: int, file: UploadFile, db: Session):
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="USER_NOT_FOUND")
+
     if not os.path.exists(UPLOAD_DIR):
         os.makedirs(UPLOAD_DIR)
     
@@ -55,7 +59,7 @@ def upload_profile_image(user_id: int, file: UploadFile, db: Session):
     if ext not in ["jpg", "jpeg", "png"]:
          raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="INVALID_FILE")
 
-    saved_filename = f"{user_id}.{ext}"
+    saved_filename = f"{user.id}.{ext}"
     file_path = os.path.join(UPLOAD_DIR, saved_filename)
     
     with open(file_path, "wb") as buffer:
@@ -64,10 +68,8 @@ def upload_profile_image(user_id: int, file: UploadFile, db: Session):
     profile_image_url = f"/public/image/profile/{saved_filename}"
     
     # DB 업데이트
-    user = db.query(User).filter(User.id == user_id).first()
-    if user:
-        user.profile_image_url = profile_image_url
-        db.commit()
-        db.refresh(user)
+    user.profile_image_url = profile_image_url
+    db.commit()
+    db.refresh(user)
         
     return profile_image_url

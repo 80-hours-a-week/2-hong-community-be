@@ -57,8 +57,7 @@ def delete_user(user_id: int, current_user: dict, db: Session):
     }
 
 def upload_profile_image(file: UploadFile, current_user: dict, db: Session):
-    # Only for me, so no userId param in URL usually for this specific endpoint structure '/me/profile-image'
-    
+        
     image_url = service_upload_image(current_user["id"], file, db)
     
     return {
