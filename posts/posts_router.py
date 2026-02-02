@@ -49,7 +49,7 @@ async def delete_post(postId: int, user: dict = Depends(get_current_user), db: S
     return posts_controller.delete_post(postId, user, db)
 
 @router.post("/image", status_code=201)
-async def upload_post_image(postFile: UploadFile = File(...), user: dict = Depends(get_current_user)):
+def upload_post_image(postFile: UploadFile = File(...), user: dict = Depends(get_current_user)):
     # Image upload doesn't need DB
     return posts_controller.upload_post_image(postFile)
 

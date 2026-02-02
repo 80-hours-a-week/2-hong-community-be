@@ -43,7 +43,8 @@ async def login(req: LoginRequest, request: Request, db: Session):
             "user": {
                 "id": user.id,
                 "email": user.email,
-                "nickname": user.nickname
+                "nickname": user.nickname,
+                "profileImageUrl": user.profile_image_url
             }
         }
     }
