@@ -27,7 +27,7 @@ class UserInfo(BaseModel):
 
 # 로그인 성공 데이터
 class LoginSuccessData(BaseModel):
-    user: Dict[str, Any]  # id, email, nickname, authToken 포함
+    user: Dict[str, Any]  # id, email, nickname 포함
 
 # 에러 응답 데이터 구조 (422 등)
 class ValidationErrorData(BaseModel):
