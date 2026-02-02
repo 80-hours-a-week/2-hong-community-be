@@ -5,7 +5,6 @@ from sqlalchemy.orm import Session
 
 from auth.auth_schemas import SignupRequest, LoginRequest
 from auth import auth_service
-from exceptions import validation_exception_handler
 
 async def signup(req: SignupRequest, db: Session):
     # 이메일 중복 체크
@@ -68,8 +67,7 @@ async def get_me(user: dict):
 
 async def check_email(request: Request, email: str, db: Session):
     if not email:
-        exc = RequestValidationError([{"loc": ["query", "email"], "msg": "Email is required"}])
-        return await validation_exception_handler(request, exc)
+        raise RequestValidationError([{"loc": ["query", "email"], "msg": "Email is required", "type": "value_error.missing"}])
         
     if auth_service.is_email_exist(email, db):
         return JSONResponse(
@@ -81,8 +79,7 @@ async def check_email(request: Request, email: str, db: Session):
 
 async def check_nickname(request: Request, nickname: str, db: Session):
     if not nickname:
-        exc = RequestValidationError([{"loc": ["query", "nickname"], "msg": "Nickname is required"}])
-        return await validation_exception_handler(request, exc)
+        raise RequestValidationError([{"loc": ["query", "nickname"], "msg": "Nickname is required", "type": "value_error.missing"}])
 
     if auth_service.is_nickname_exist(nickname, db):
         return JSONResponse(

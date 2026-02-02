@@ -45,8 +45,7 @@ async def get_post_detail(request, postId: int, db: Session, user: dict = None):
     post = posts_service.get_post_detail(postId, db)
     
     if post is None:
-        from exceptions import not_found_exception_handler
-        return await not_found_exception_handler(request)
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="POST_NOT_FOUND")
     
     if user:
          posts_service.increase_view_count(postId, user["id"], db)

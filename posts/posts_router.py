@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Query, Request, Depends, UploadFile, File
+from fastapi.exceptions import RequestValidationError
 from sqlalchemy.orm import Session
 from database import get_db
 from schemas import PostCreate, PostUpdate
 from posts import posts_controller
-from exceptions import validation_exception_handler
 from auth.auth_dependencies import get_current_user
 from typing import Optional
 
@@ -15,7 +15,10 @@ router = APIRouter(
 @router.get("")
 async def get_posts(request: Request, page: int = Query(1), size: int = Query(10), db: Session = Depends(get_db)):
     if page <= 0 or size <= 0:
-        return await validation_exception_handler(request, None)
+        # 수동으로 유효성 검사 에러 발생
+        raise RequestValidationError(
+            [{"loc": ["query", "page"], "msg": "Page and size must be greater than 0", "type": "value_error.number.not_gt"}]
+        )
 
     result = posts_controller.get_all_posts(page, size, db)
     return result
