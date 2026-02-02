@@ -1,10 +1,10 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import desc
 from models import Comment, Post
 from schemas import CommentCreate, CommentUpdate
 
 def get_comments(postId: int, db: Session):
-    return db.query(Comment).filter(Comment.post_id == postId).order_by(desc(Comment.created_at)).all()
+    return db.query(Comment).options(joinedload(Comment.user)).filter(Comment.post_id == postId).order_by(desc(Comment.created_at)).all()
 
 def get_comment(commentId: int, db: Session):
     return db.query(Comment).filter(Comment.id == commentId).first()
@@ -12,6 +12,7 @@ def get_comment(commentId: int, db: Session):
 def create_comment(postId: int, comment_data: CommentCreate, user: dict, db: Session):
     new_comment = Comment(
         post_id=postId,
+        user_id=user["id"],
         comment=comment_data.content,
         nickname=user["nickname"]
     )

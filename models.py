@@ -42,6 +42,7 @@ class Comment(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     post_id = Column(Integer, ForeignKey("posts.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     comment = Column(String(100), nullable=False)
     nickname = Column(String(100), nullable=False)
     created_at = Column(DateTime, default=func.now())
@@ -49,6 +50,7 @@ class Comment(Base):
     deleted_at = Column(DateTime, nullable=True)
 
     post = relationship("Post", back_populates="comments")
+    user = relationship("User")
 
 class Like(Base):
     __tablename__ = "likes"
