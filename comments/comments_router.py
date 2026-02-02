@@ -6,6 +6,7 @@ from comments import comments_controller
 from auth.auth_dependencies import get_current_user
 
 router = APIRouter(
+    prefix="/v1/posts",
     tags=["comments"]
 )
 
