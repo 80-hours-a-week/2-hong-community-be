@@ -24,7 +24,7 @@ async def get_current_user(request: Request, db: Session = Depends(get_db)):
     
     # SQLAlchemy 객체는 dict처럼 사용하기 위해 속성들을 딕셔너리로 변환하거나, 
     # 혹은 객체 그대로 넘기고 사용하는 곳에서 속성으로 접근하게 함.
-    # 여기서는 호환성을 위해 dict 형태로 변환하여 반환합니다.
+    # 호환성을 위해 dict 형태로 변환하여 반환.
     return {
         "id": user.id,
         "email": user.email,

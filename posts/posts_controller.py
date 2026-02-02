@@ -1,163 +1,154 @@
-from datetime import datetime
-from database import posts_db
-from schemas import Post, PostCreate, PostUpdate
-from fastapi import HTTPException, status, Request, UploadFile
-from exceptions import not_found_exception_handler
+from fastapi import HTTPException, status, UploadFile
+from sqlalchemy.orm import Session
+from posts import posts_service
+from schemas import PostCreate, PostUpdate
 import os
 import shutil
 import uuid
 
 UPLOAD_DIR = "public/image/posts"
 
-def get_all_posts(page: int, size: int):
-    posts = posts_db.get_posts()
-    start = (page - 1) * size
-    end = start + size
+def get_all_posts(page: int, size: int, db: Session):
+    posts = posts_service.get_all_posts(page, size, db)
+    
+    data = []
+    for p in posts:
+        like_count = posts_service.get_post_like_count(p.id, db)
+        view_count = posts_service.get_post_view_count(p.id, db)
+        comment_count = len(p.comments)
+
+        data.append({
+            "postId": p.id,
+            "title": p.title,
+            "content": p.detail,
+            "likeCount": like_count,
+            "commentCount": comment_count,
+            "hits": view_count,
+            "author": {
+                "userId": p.user_id,
+                "nickname": p.nickname,
+                "profileImageUrl": p.user.profile_image_url if p.user else None
+            },
+            "file": {
+                "fileId": 1, # 임시
+                "fileUrl": p.post_image_url
+            } if p.post_image_url else None,
+            "createdAt": p.created_at.isoformat() if p.created_at else ""
+        })
+
     return {
         "code": "posts_retrieved",
-        "data": posts[start:end]
+        "data": data
     }
 
-async def get_post_detail(request, postId: int):
-    posts = posts_db.get_posts()
-    post = next((p for p in posts if p["postId"] == postId), None)
+async def get_post_detail(request, postId: int, db: Session, user: dict = None):
+    post = posts_service.get_post_detail(postId, db)
     
     if post is None:
+        from exceptions import not_found_exception_handler
         return await not_found_exception_handler(request)
     
-    # 조회수 증가
-    post["hits"] += 1
-    posts_db.save_posts(posts)
-    return post
+    if user:
+         posts_service.increase_view_count(postId, user["id"], db)
 
-def create_post(post_data: PostCreate, user: dict):
-    posts = posts_db.get_posts()
-    new_id = max([p["postId"] for p in posts], default=0) + 1
-    
-    # 1. Post 모델 인스턴스 생성
-    new_post = Post(
-        postId=new_id,
-        title=post_data.title,
-        content=post_data.content,
-        likeCount=0,
-        commentCount=0,
-        hits=0,
-        author={
-            "userId": user["id"],
-            "nickname": user["nickname"],
-            "profileImageUrl": user.get("profileImageUrl") or "http://default-image.com/profile.jpg"
+    like_count = posts_service.get_post_like_count(postId, db)
+    view_count = posts_service.get_post_view_count(postId, db)
+    comment_count = len(post.comments)
+    is_liked = posts_service.is_liked_by_user(postId, user["id"], db) if user else False
+
+    return {
+        "postId": post.id,
+        "title": post.title,
+        "content": post.detail,
+        "likeCount": like_count,
+        "commentCount": comment_count,
+        "hits": view_count,
+        "author": {
+            "userId": post.user_id,
+            "nickname": post.nickname,
+            "profileImageUrl": post.user.profile_image_url if post.user else None
         },
-        file={
+        "file": {
             "fileId": 1,
-            "fileUrl": post_data.image if post_data.image else ""
-        },
-        createdAt=datetime.now().isoformat()
-    )
-    
-    # 2. JSON 파일에 저장하기 위해 딕셔너리로 변환
-    posts.append(new_post.model_dump()) 
-    posts_db.save_posts(posts)
+            "fileUrl": post.post_image_url
+        } if post.post_image_url else None,
+        "createdAt": post.created_at.isoformat() if post.created_at else "",
+        "likedBy": [l.user_id for l in post.likes] # 성능 주의
+    }
+
+def create_post(post_data: PostCreate, user: dict, db: Session):
+    new_post = posts_service.create_post(post_data, user["id"], db)
     
     return {
         "code": "post_success",
-        "data": {"postId": new_id}
+        "data": {"postId": new_post.id}
     }
 
-def update_post(postId: int, post_data: PostUpdate, user: dict):
-    posts = posts_db.get_posts()
-    post = next((p for p in posts if p["postId"] == postId), None)
+def update_post(postId: int, post_data: PostUpdate, user: dict, db: Session):
+    post = posts_service.get_post_detail(postId, db)
     
     if post is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="POST_NOT_FOUND")
     
-    if post["author"]["userId"] != user["id"]:
+    if post.user_id != user["id"]:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="FORBIDDEN")
     
-    post["title"] = post_data.title
-    post["content"] = post_data.content
-    
-    if post_data.fileUrl is not None:
-        if post.get("file"):
-            post["file"]["fileUrl"] = post_data.fileUrl
-        else:
-            post["file"] = {
-                "fileId": 1,
-                "fileUrl": post_data.fileUrl
-            }
-            
-    posts_db.save_posts(posts)
+    posts_service.update_post(postId, post_data, db)
     
     return {
         "code": "POST_UPDATED",
         "data": None
     }
 
-def delete_post(postId: int, user: dict):
-    posts = posts_db.get_posts()
-    post = next((p for p in posts if p["postId"] == postId), None)
+def delete_post(postId: int, user: dict, db: Session):
+    post = posts_service.get_post_detail(postId, db)
     
     if post is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="POST_NOT_FOUND")
     
-    if post["author"]["userId"] != user["id"]:
+    if post.user_id != user["id"]:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="FORBIDDEN")
     
-    posts = [p for p in posts if p["postId"] != postId]
-    posts_db.save_posts(posts)
+    posts_service.delete_post(postId, db)
     
     return {
         "code": "POST_DELETED",
         "data": None
     }
 
-def like_post(postId: int, user: dict):
-    posts = posts_db.get_posts()
-    post = next((p for p in posts if p["postId"] == postId), None)
-    
+def like_post(postId: int, user: dict, db: Session):
+    post = posts_service.get_post_detail(postId, db)
     if post is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="POST_NOT_FOUND")
+
+    success = posts_service.like_post(postId, user["id"], db)
+    if not success:
+         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="POST_ALREADY_LIKED")
     
-    if "likedBy" not in post:
-        post["likedBy"] = []
-    
-    if user["id"] in post["likedBy"]:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="POST_ALREADY_LIKED")
-    
-    post["likedBy"].append(user["id"])
-    post["likeCount"] += 1
-    
-    posts_db.save_posts(posts)
+    like_count = posts_service.get_post_like_count(postId, db)
     
     return {
         "code": "POST_LIKE_CREATED",
         "data": {
-            "likeCount": post["likeCount"]
+            "likeCount": like_count
         }
     }
 
-def unlike_post(postId: int, user: dict):
-    posts = posts_db.get_posts()
-    post = next((p for p in posts if p["postId"] == postId), None)
-    
+def unlike_post(postId: int, user: dict, db: Session):
+    post = posts_service.get_post_detail(postId, db)
     if post is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="POST_NOT_FOUND")
-    
-    if "likedBy" not in post:
-        post["likedBy"] = []
-    
-    if user["id"] not in post["likedBy"]:
+
+    success = posts_service.unlike_post(postId, user["id"], db)
+    if not success:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="POST_ALREADY_UNLIKED")
-    
-    post["likedBy"].remove(user["id"])
-    if post["likeCount"] > 0:
-        post["likeCount"] -= 1
-    
-    posts_db.save_posts(posts)
-    
+
+    like_count = posts_service.get_post_like_count(postId, db)
+
     return {
         "code": "POST_LIKE_DELETED",
         "data": {
-            "likeCount": post["likeCount"]
+            "likeCount": like_count
         }
     }
 
