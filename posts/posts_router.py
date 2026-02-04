@@ -13,7 +13,7 @@ router = APIRouter(
 )
 
 @router.get("")
-async def get_posts(request: Request, page: int = Query(1), size: int = Query(10), db: Session = Depends(get_db)):
+async def get_posts(request: Request, page: int = Query(1), size: int = Query(10), db: Session = Depends(get_db), user: dict = Depends(get_current_user)):
     if page <= 0 or size <= 0:
         # 수동으로 유효성 검사 에러 발생
         raise RequestValidationError(
@@ -28,8 +28,9 @@ async def get_post_detail(
     request: Request, 
     postId: int, 
     db: Session = Depends(get_db),
+    user: dict = Depends(get_current_user)
 ):
-    post = await posts_controller.get_post_detail(request, postId, db, user=None)
+    post = await posts_controller.get_post_detail(request, postId, db, user=user)
     
     return {
         "code": "post_retrieved",
